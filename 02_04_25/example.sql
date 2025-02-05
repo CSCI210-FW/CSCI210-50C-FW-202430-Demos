@@ -1,4 +1,3 @@
 -- SQLite
-select cus_fname,
-    cus_lname
-from customer
+select distinct v_code
+from product

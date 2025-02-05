@@ -1,0 +1,5 @@
+select DISTINCT EMP_NUM
+FROM ASSIGNMENT 
+
+
+

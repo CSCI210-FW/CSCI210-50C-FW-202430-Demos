@@ -1,1 +1,2 @@
-dillon
+select distinct EMP_NUM
+from assignment

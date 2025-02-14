@@ -6,6 +6,7 @@
 
 void viewAssignmentsByProject(sqlite3 *);
 void resetStream();
+int genericRowCallback(void *, int, char**, char**);
 
 int main()
 {
@@ -15,7 +16,51 @@ int main()
     {
         std::cout << "Error opening database: " << sqlite3_errmsg(db) << std::endl;
     }
-    viewAssignmentsByProject(db);
+    //viewAssignmentsByProject(db);
+    std::string query = "select * from employee";
+    rc = sqlite3_exec(db, query.c_str(), genericRowCallback, NULL, NULL);
+    if(rc != SQLITE_OK)
+    {
+        std::cout << "There was an error at the select callback: "
+        << sqlite3_errmsg(db) << std::endl;
+        std::cout << query << std::endl;
+    }
+    query = "delete from employee where emp_lname = 'Brown' and emp_fname = 'Charlie'";
+    rc = sqlite3_exec(db, query.c_str(), NULL, NULL, NULL);
+    if (rc != SQLITE_OK)
+    {
+
+        std::cout << "There was an error with deleting charlie brown: " << sqlite3_errmsg(db) << std::endl;
+        std::cout << query << std::endl;
+    }
+    std::string lname, fname, mi;
+    int job, years;
+    char formatDate[80];
+    time_t currentDate = time(NULL);
+    strftime(formatDate, 80, "%F", localtime(&currentDate));
+    std::string hiredate(formatDate);
+    lname = "Brown";
+    fname = "Charlie";
+    job = 504;
+    years = 0;
+    query = "insert into employee(emp_lname, emp_fname, emp_hiredate, job_code, emp_years)\n"
+    "values ('" + lname + "', '"
+    + fname + "', '"
+    + hiredate + "', "
+    + std::to_string(job) + ", " + std::to_string(years) + ")";
+    rc = sqlite3_exec(db, query.c_str(),NULL,NULL, NULL);
+    if (rc != SQLITE_OK)
+    {
+
+        std::cout << "There was an error with adding charlie brown: " << sqlite3_errmsg(db) << std::endl;
+        std::cout << query << std::endl;
+    }
+    else
+    {
+        int emp_num = sqlite3_last_insert_rowid(db);
+        std::cout << fname << " " << lname << " inserted into the database as employee number " << emp_num << std::endl;
+    }
+    
     sqlite3_close(db);
     return 0;
 }
@@ -114,4 +159,17 @@ void viewAssignmentsByProject(sqlite3 * db)
     }
     
     sqlite3_finalize(result);
+}
+
+int genericRowCallback(void * data, int numCols, char** values, char** colNames)
+{
+    for(int i = 0; i < numCols; i++)
+    {
+        std::cout << colNames[i] << ": ";
+        if(values[i] != NULL)
+            std::cout << values[i];
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    return SQLITE_OK;
 }

@@ -40,7 +40,7 @@ void resetStream()
     steps for making a sale
     todo create a new customer invoice
         //todo pick customer or
-        todo add new customer
+        //todo add new customer
         todo create new invoice row using the cus_code
         todo add products to the invoice
             todo pick product
@@ -160,7 +160,46 @@ bool checkForError(int rc, sqlite3 *db, sqlite3_stmt *r, std::string msg)
 
 int addCustomer(sqlite3 *db)
 {
-    return 10010;
+    std::string query = "insert into customer(cus_lname, cus_fname, cus_phone)\n";
+    "values(@lname, @fname, @phone)";
+    std::string lname;
+    std::string fname;
+    std::string phone;
+    std::cout << "Enter the customer last name: ";
+    std::getline(std::cin >> std::ws, lname);
+    std::cout << "Enter the customer first name: ";
+    std::getline(std::cin >> std::ws, fname);
+    std::cout << "Enter the customer phone number: ";
+    std::getline(std::cin >> std::ws, phone);
+    sqlite3_stmt *res;
+    int rc = sqlite3_prepare_v2(db, query.c_str(), -1, &res, NULL);
+    if (checkForError(rc, db, res, "unable to insert customer."))
+    {
+        std::cout << query << std::endl;
+        return -1;
+    }
+    rc = sqlite3_bind_text(res, sqlite3_bind_parameter_index(res, "@lname"), lname.c_str(), -1, SQLITE_STATIC);
+    if (checkForError(rc, db, res, "unable to insert customer."))
+    {
+        std::cout << query << std::endl;
+        return -1;
+    }
+    rc = sqlite3_bind_text(res, sqlite3_bind_parameter_index(res, "@fname"), fname.c_str(), -1, SQLITE_STATIC);
+    if (checkForError(rc, db, res, "unable to insert customer."))
+    {
+        std::cout << query << std::endl;
+        return -1;
+    }
+    rc = sqlite3_bind_text(res, sqlite3_bind_parameter_index(res, "@phone"), phone.c_str(), -1, SQLITE_STATIC);
+    if (checkForError(rc, db, res, "unable to insert customer."))
+    {
+        std::cout << query << std::endl;
+        return -1;
+    }
+    sqlite3_step(res);
+    int cusCode = sqlite3_last_insert_rowid(db);
+    sqlite3_finalize(res);
+    return cusCode;
 }
 
 int createInvoice(sqlite3 *db, int customer)
